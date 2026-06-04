@@ -1,0 +1,22 @@
+networks:
+  traefik-network:
+    external: true
+
+services:
+  plane-bridge:
+    build: .
+    container_name: plane-bridge-api
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.plane-web.rule=Host(`${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.plane-web.entrypoints=websecure"
+      - "traefik.http.routers.plane-web.tls=true"
+      - "traefik.http.routers.plane-web.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.plane-web.priority=1"
+      - "traefik.http.services.plane-web.loadbalancer.server.port=8000"
