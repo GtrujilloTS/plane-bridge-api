@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime, timezone
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from app.aggregator import extract_workspace
 from app.auth import verify_api_key
@@ -21,14 +22,26 @@ app = FastAPI(
     version="1.0.0",
 )
 
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "X-API-Key, Content-Type, Authorization",
+    "Access-Control-Max-Age": "3600",
+}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["GET", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["X-API-Key", "Content-Type", "Authorization"],
     expose_headers=["*"],
 )
+
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str, request: Request):
+    return Response(status_code=200, headers=CORS_HEADERS)
 
 
 @app.get("/health")
