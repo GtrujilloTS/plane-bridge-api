@@ -1,12 +1,11 @@
 import logging
 from datetime import datetime, timezone
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 from app.aggregator import extract_workspace
-from app.auth import verify_api_key
 from app.config import settings
 from app.models import IssuesResponse, ProjectsResponse, WorkspaceResponse
 from app import plane_client as pc
@@ -56,7 +55,6 @@ async def health():
 )
 async def get_workspace_full(
     workspace_slug: str = settings.default_workspace_slug,
-    _: str = Depends(verify_api_key),
 ):
     return await extract_workspace(workspace_slug)
 
@@ -68,7 +66,6 @@ async def get_workspace_full(
 )
 async def get_workspace_projects(
     workspace_slug: str = settings.default_workspace_slug,
-    _: str = Depends(verify_api_key),
 ):
     errors = []
     try:
@@ -103,7 +100,6 @@ async def get_workspace_projects(
 )
 async def get_workspace_issues(
     workspace_slug: str = settings.default_workspace_slug,
-    _: str = Depends(verify_api_key),
 ):
     errors = []
     all_issues = []
